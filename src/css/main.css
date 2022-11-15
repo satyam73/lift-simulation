@@ -1,0 +1,121 @@
+html{
+    font-size: 62.5%;
+}
+
+body{
+    background-color: blanchedalmond;
+}
+/* form designing */
+
+.form{
+    width: fit-content;
+    margin: auto;
+    display: flex;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+.label{
+    font-size: 2rem;
+    margin-right: 0.5rem;
+}
+.input{
+    padding: 0.2;
+    margin-right: 0.5rem;
+    font-size: 2rem;
+}
+
+/* floor designing */
+.floor:first-child{
+    border: 2px solid black;
+}
+.floor{
+    margin: auto;
+    height: 15rem;
+    width: 90vw;
+    border: 2px solid black;
+    border-top: 0;
+}
+
+/* button designing */
+.button-container{
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    margin-right: 2rem;
+    z-index: 12;
+}
+.btn{
+    width: fit-content;
+    margin: 0.2rem;
+}
+
+/* lift designing */
+#lifts{
+    display: flex;
+    justify-content: space-around;
+}
+
+.lift:first-child{
+    margin-left: 9rem;
+}
+.lift{
+    display: flex;
+    width: 10rem;
+    height: 15rem;
+    background-color: aqua;
+    z-index: -12;
+}
+
+.left-door, .right-door{
+    width:49%;
+    height: 98%;
+    background-color:  rgb(56, 101, 248);
+    border: 2px solid grey;
+}
+
+/* animation classes */
+/* .open{
+    animation: open 2s linear;
+}
+.close{
+    animation: close 2s linear 2s;
+} */
+
+/* keyframes */
+@keyframes open {
+    0%{
+        width: 49%;
+    }
+    100%{
+        width: 0%;
+    }
+   
+}
+@keyframes close {
+    0%{
+        width: 0%;
+    }
+    100%{
+        width: 49%;
+    }
+}
+
+
+/* media queries */
+@media only screen and (max-width: 767px ){
+    html{
+        font-size: 50%;
+    }
+    .form{
+        flex-direction: column;
+    }
+    .label{
+       margin-top: 0.5rem;
+       margin-bottom: 0.5rem;
+
+    }
+    .input{
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+}
