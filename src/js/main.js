@@ -8,7 +8,7 @@ const startBtn = document.getElementById("startBtn");
 var door = new Audio("doorSound.mp3");
 var bell = new Audio("bellSound.mp3");
 
-function inputValidator(lifts, floors) {
+function inputValidator(floors, lifts) {
   const regex = /^[0-9]+$/;
   if (regex.test(lifts) && regex.test(floors)) {
     return true;
@@ -28,15 +28,19 @@ function inputChangeHandler(elem) {
 function startHandler(e) {
   let floors = +numOfFloor.value;
   let lifts = +numOFLifts.value;
-  if (floors <= 0 || lifts <= 0) {
-    alert("please add proper values in the fields");
-    return 0;
-  }
-  if (window.innerWidth < 767 && lifts > 3) {
-    alert("only three lifts will be available for mobile:)");
+  if (inputValidator(floors, lifts)) {
+    if (floors <= 0 || lifts <= 0) {
+      alert("please add proper values in the fields");
+      return 0;
+    }
+    if (window.innerWidth < 767 && lifts > 3) {
+      alert("only three lifts will be available for mobile:)");
+    } else {
+      floorGenerator(floors, lifts);
+      liftGenerator(lifts, floors);
+    }
   } else {
-    floorGenerator(floors, lifts);
-    liftGenerator(lifts, floors);
+    alert("Please add digits only!");
   }
 }
 
