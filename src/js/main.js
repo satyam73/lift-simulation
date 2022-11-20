@@ -4,11 +4,34 @@ const numOfFloor = document.getElementById("numOfFloor");
 const numOFLifts = document.getElementById("numOFLifts");
 const floorContainer = document.getElementsByClassName("floor-container")[0];
 const liftContainer = document.getElementById("lifts");
+const startBtn = document.getElementById("startBtn");
+var door = new Audio("doorSound.mp3");
+var bell = new Audio("bellSound.mp3");
 
+function inputValidator(lifts, floors) {
+  const regex = /^[0-9]+$/;
+  if (regex.test(lifts) && regex.test(floors)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+function inputChangeHandler(elem) {
+  console.log(elem);
+  let floors = +numOfFloor.value;
+  let lifts = +numOFLifts.value;
+  if (floors > 0 && lifts > 0) {
+    console.log(floors, lifts);
+    startBtn.disabled = false;
+  }
+}
 function startHandler(e) {
   let floors = +numOfFloor.value;
   let lifts = +numOFLifts.value;
-
+  if (floors <= 0 || lifts <= 0) {
+    alert("please add proper values in the fields");
+    return 0;
+  }
   if (window.innerWidth < 767 && lifts > 3) {
     alert("only three lifts will be available for mobile:)");
   } else {
@@ -40,14 +63,19 @@ function floorGenerator(floors, lifts) {
     // appending buttons to button container
     buttonContainer.appendChild(upBtn);
     buttonContainer.appendChild(downBtn);
-    // console.log(buttonContainer);
+    //creating floor no. element
+    let floorNumElem = document.createElement("p");
+    floorNumElem.setAttribute("class", "floorNumLabel");
+    floorNumElem.innerText = "Floor - " + (floors - i);
+
+    // creating floor element
     let floorElement = document.createElement("div");
     floorElement.setAttribute("class", "floor");
     floorElement.setAttribute("data-floor", floors - i + 1);
-
     // appending button container to each floor element
     floorElement.appendChild(buttonContainer);
     // console.log(floorElement);
+    floorElement.appendChild(floorNumElem);
 
     //  appending all floor elements to all floors container
     floorContainer.appendChild(floorElement);
@@ -61,8 +89,7 @@ function liftGenerator(lifts, floors) {
     lift.setAttribute("class", "lift");
     lift.setAttribute("data-floor", 1);
     lift.style.transform = `translateY(-15.2rem)`;
-    // lift.style.top = floors * 10 + 4 + "rem";
-    // lift.style.left = i * 10 + 2 * spacing + "rem";
+
     // creating left door
     let leftDoor = document.createElement("div");
     leftDoor.setAttribute("class", "left-door");
@@ -73,78 +100,66 @@ function liftGenerator(lifts, floors) {
     lift.appendChild(rightDoor);
 
     liftContainer.appendChild(lift);
-    // lifts.appendChild(buttonContainer);
-    // console.log(floorElement);
-
-    // generating lift
-
-    // floorElement.innerText = "HEllo" + i;
-    // console.log(i);
-    // spacing++;
   }
 }
 
 function upHandler(elem) {
   const leftDoor = Array.from(document.getElementsByClassName("left-door"));
   const rightDoor = Array.from(document.getElementsByClassName("right-door"));
-
+  let animationTimeout;
   let calledFloor = +elem.getAttribute("data-floor");
 
   let lifts = Array.from(document.getElementsByClassName("lift"));
   let closestLift = 0;
   let prevTemp = 100000;
+  clearTimeout(animationTimeout);
 
   // finding closest lift
   lifts.forEach((lift, i) => {
     let temp = Math.abs(+lift.getAttribute("data-floor") - calledFloor);
 
-    // console.log(temp, " ", i);
-    // console.log(+lifts[closestLift].getAttribute("data-floor"));
     if (temp < prevTemp) {
       closestLift = i;
-      // console.log(closestLift);
     }
     prevTemp = temp;
   });
-  // console.log(closestLift);
 
   // moving lift to the called floor
   lifts[closestLift].style.transform = `translateY(-${
     calledFloor * 15 + 0.2 * calledFloor
   }rem)`;
-  lifts[closestLift].setAttribute("data-floor", calledFloor);
+  let liftFloor = +lifts[closestLift].getAttribute("data-floor");
+
   lifts[closestLift].style.transition = `all ${
-    Math.abs(+closestLift - calledFloor + 1) * 2.5
-  }s`;
-  // console.log(closestLift);
-  // console.log(+lifts[closestLift].getAttribute("data-floor"));
-  // console.log(calledFloor);
-  // console.log(Math.abs(+closestLift - calledFloor + 1) * 2.5);
-  // console.log(+lifts[closestLift].getAttribute("data-floor") - calledFloor + 1);
+    Math.abs(liftFloor - calledFloor) * 2.5
+  }s linear`;
+  lifts[closestLift].setAttribute("data-floor", calledFloor);
 
   // open and close doors animations
-  // removing previous animations
+  // ------removing previous animations
   leftDoor[closestLift].style.animation = "none";
   rightDoor[closestLift].style.animation = "none";
-
-  // adding new animations
-  setTimeout(() => {
+  // ------adding new animations;
+  animationTimeout = setTimeout(() => {
+    door.play();
+    bell.play();
     leftDoor[closestLift].style.animation =
       "open 2s linear 1, close 2s linear 2s";
     rightDoor[closestLift].style.animation =
       "open 2s linear 1, close 2s linear 2s";
-  }, +Math.abs(+closestLift - calledFloor + 1) * 2.5 * 1000 + 2);
+  }, +Math.abs(liftFloor - calledFloor) * 2.5 * 1000 + 2);
 }
 
 function downHandler(elem) {
   const leftDoor = Array.from(document.getElementsByClassName("left-door"));
   const rightDoor = Array.from(document.getElementsByClassName("right-door"));
   let calledFloor = elem.getAttribute("data-floor");
-
+  let animationTimeout;
   let lifts = Array.from(document.getElementsByClassName("lift"));
   let closestLift = 0;
   let prevTemp = 100000;
 
+  clearTimeout(animationTimeout);
   // finding closest lift
   lifts.forEach((lift, i) => {
     let temp = Math.abs(+lift.getAttribute("data-floor") - calledFloor);
@@ -157,26 +172,30 @@ function downHandler(elem) {
     }
     prevTemp = temp;
   });
-  // console.log(closestLift);
 
   // moving lift to the called floor
   lifts[closestLift].style.transform = `translateY(-${
     calledFloor * 15 + 0.2 * calledFloor
   }rem)`;
-  lifts[closestLift].setAttribute("data-floor", calledFloor);
+
+  let liftFloor = +lifts[closestLift].getAttribute("data-floor");
+
   lifts[closestLift].style.transition = `all ${
-    Math.abs(+closestLift - calledFloor + 1) * 2.5
-  }s`;
-  // removing previous animations
+    Math.abs(liftFloor - calledFloor) * 2.5
+  }s linear`;
+  lifts[closestLift].setAttribute("data-floor", calledFloor);
+
+  // open and close doors animations
+  // -----removing previous animations
   leftDoor[closestLift].style.animation = "none";
   rightDoor[closestLift].style.animation = "none";
-
-  // adding new animations
-  setTimeout(() => {
+  // ------adding new animations
+  animationTimeout = setTimeout(() => {
+    door.play();
+    bell.play();
     leftDoor[closestLift].style.animation =
       "open 2s linear 1, close 2s linear 2s";
     rightDoor[closestLift].style.animation =
       "open 2s linear 1, close 2s linear 2s";
-  }, +Math.abs(+closestLift - calledFloor + 1) * 2.5 * 1000 + 2);
-  // console.log(closestLift);
+  }, +Math.abs(liftFloor - calledFloor) * 2.5 * 1000 + 2);
 }

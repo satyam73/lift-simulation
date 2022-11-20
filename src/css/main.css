@@ -17,11 +17,16 @@ body{
 .label{
     font-size: 2rem;
     margin-right: 0.5rem;
+    color: black;
 }
 .input{
     padding: 0.2;
     margin-right: 0.5rem;
     font-size: 2rem;
+    background-color: rgb(127, 255, 212);
+    border: 2px solid rgba(19, 238, 165, 0.637);
+    outline: none;
+    border-radius: 10px;
 }
 
 /* floor designing */
@@ -47,8 +52,16 @@ body{
 .btn{
     width: fit-content;
     margin: 0.2rem;
+    padding: .6rem;
+    background-color: aqua;
+    background-color: rgb(127, 255, 212);
+    border: 2px solid rgba(19, 238, 165, 0.637);
+    /* outline: none; */
+    border-radius: 10px;
 }
-
+.floorNumLabel{
+    font-size: 2rem;
+}
 /* lift designing */
 #lifts{
     display: flex;
@@ -119,3 +132,4 @@ body{
         margin-bottom: 0.5rem;
     }
 }
+

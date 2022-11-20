@@ -12,10 +12,10 @@
     <div class="formContainer">
         <form class="form" action="">
             <label class="label" for="numOfFloor">No. of Floors</label>
-            <input class="input" id="numOfFloor" type="text">
+            <input onChange="inputChangeHandler(this)" class="input" id="numOfFloor" type="text">
             <label class="label" for="numOFLifts">No. of Lifts</label>
-            <input class="input" id="numOFLifts" type="text">
-            <input class="input" onclick="startHandler()" type="button" value="Start">
+            <input onChange="inputChangeHandler(this)" class="input" id="numOFLifts" type="text">
+            <input disabled id="startBtn" class="input" onclick="startHandler()" type="button" value="Start">
         </form>
     </div>
     <div class="lift-simulation-container">
