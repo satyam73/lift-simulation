@@ -12,9 +12,9 @@
     <div class="formContainer">
         <form class="form" action="">
             <label class="label" for="numOfFloor">No. of Floors</label>
-            <input onChange="inputChangeHandler(this)" class="input" id="numOfFloor" type="text">
+            <input oninput="inputChangeHandler(this)" class="input" id="numOfFloor" type="text">
             <label class="label" for="numOFLifts">No. of Lifts</label>
-            <input onChange="inputChangeHandler(this)" class="input" id="numOFLifts" type="text">
+            <input oninput="inputChangeHandler(this)" class="input" id="numOFLifts" type="text">
             <input disabled id="startBtn" class="input" onclick="startHandler()" type="button" value="Start">
         </form>
     </div>

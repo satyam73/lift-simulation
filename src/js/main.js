@@ -5,8 +5,10 @@ const numOFLifts = document.getElementById("numOFLifts");
 const floorContainer = document.getElementsByClassName("floor-container")[0];
 const liftContainer = document.getElementById("lifts");
 const startBtn = document.getElementById("startBtn");
-var door = new Audio("doorSound.mp3");
-var bell = new Audio("bellSound.mp3");
+
+// controllers
+const availableLifts = [];
+const waitingQueue = [];
 
 function inputValidator(floors, lifts) {
   const regex = /^[0-9]+$/;
@@ -28,6 +30,9 @@ function inputChangeHandler(elem) {
 function startHandler(e) {
   let floors = +numOfFloor.value;
   let lifts = +numOFLifts.value;
+  for (let i = 0; i < lifts; i++) {
+    availableLifts[i] = true;
+  }
   if (inputValidator(floors, lifts)) {
     if (floors <= 0 || lifts <= 0) {
       alert("please add proper values in the fields");
@@ -88,10 +93,15 @@ function floorGenerator(floors, lifts) {
 
 function liftGenerator(lifts, floors) {
   // let spacing = 0;
+
   for (let i = 1; i <= lifts; i++) {
+    availableLifts[i - 1] = true;
+    // liftState[i - 1] = "stable";
     let lift = document.createElement("div");
     lift.setAttribute("class", "lift");
     lift.setAttribute("data-floor", 1);
+
+    // for adding lift to ground/0 floor
     lift.style.transform = `translateY(-15.2rem)`;
 
     // creating left door
@@ -108,98 +118,139 @@ function liftGenerator(lifts, floors) {
 }
 
 function upHandler(elem) {
+  let door = new Audio("doorSound.mp3");
+  let bell = new Audio("bellSound.mp3");
   const leftDoor = Array.from(document.getElementsByClassName("left-door"));
   const rightDoor = Array.from(document.getElementsByClassName("right-door"));
   let animationTimeout;
   let calledFloor = +elem.getAttribute("data-floor");
-
+  let busy = false;
   let lifts = Array.from(document.getElementsByClassName("lift"));
   let closestLift = 0;
-  let prevTemp = 100000;
-  clearTimeout(animationTimeout);
+
+  busy = availableLifts.every((element) => (element === false ? true : false));
+  console.log(busy);
+
+  if (busy) {
+    console.log("you're in busy");
+    waitingQueue.push(calledFloor);
+    alert("Lifts are busy please wait!");
+  }
+  console.log(waitingQueue);
 
   // finding closest lift
-  lifts.forEach((lift, i) => {
-    let temp = Math.abs(+lift.getAttribute("data-floor") - calledFloor);
-
-    if (temp < prevTemp) {
+  lifts.every((lift, i) => {
+    console.log(i);
+    if (availableLifts[i]) {
       closestLift = i;
+      return false;
     }
-    prevTemp = temp;
+    return true;
   });
+  // console.log(closestLift);
 
   // moving lift to the called floor
-  lifts[closestLift].style.transform = `translateY(-${
-    calledFloor * 15 + 0.2 * calledFloor
-  }rem)`;
-  let liftFloor = +lifts[closestLift].getAttribute("data-floor");
+  if (availableLifts[closestLift]) {
+    availableLifts[closestLift] = false;
+    lifts[closestLift].style.transform = `translateY(-${
+      calledFloor * 15 + 0.2 * calledFloor
+    }rem)`;
+    let liftFloor = +lifts[closestLift].getAttribute("data-floor");
 
-  lifts[closestLift].style.transition = `all ${
-    Math.abs(liftFloor - calledFloor) * 2.5
-  }s linear`;
-  lifts[closestLift].setAttribute("data-floor", calledFloor);
+    lifts[closestLift].style.transition = `all ${
+      Math.abs(liftFloor - calledFloor) * 2.5
+    }s linear`;
+    lifts[closestLift].setAttribute("data-floor", calledFloor);
 
-  // open and close doors animations
-  // ------removing previous animations
-  leftDoor[closestLift].style.animation = "none";
-  rightDoor[closestLift].style.animation = "none";
-  // ------adding new animations;
-  animationTimeout = setTimeout(() => {
-    door.play();
-    bell.play();
-    leftDoor[closestLift].style.animation =
-      "open 2s linear 1, close 2s linear 2s";
-    rightDoor[closestLift].style.animation =
-      "open 2s linear 1, close 2s linear 2s";
-  }, +Math.abs(liftFloor - calledFloor) * 2.5 * 1000 + 2);
+    // open and close doors animations
+    // ------removing previous animations
+    leftDoor[closestLift].style.animation = "none";
+    rightDoor[closestLift].style.animation = "none";
+    // ------adding new animations;
+    function anim(callback) {
+      leftDoor[closestLift].style.animation =
+        "open 2s linear 1, close 2s linear 2s";
+      rightDoor[closestLift].style.animation =
+        "open 2s linear 1, close 2s linear 2s";
+      callback();
+    }
+    animationTimeout = setTimeout(() => {
+      door.play();
+      bell.play();
+      anim(afterDoorAnim);
+    }, +Math.abs(liftFloor - calledFloor) * 2.5 * 1000 + 2);
+    function afterDoorAnim() {
+      setTimeout(() => {
+        availableLifts[closestLift] = true;
+      }, 1000 * 4);
+    }
+  }
 }
 
 function downHandler(elem) {
+  let door = new Audio("doorSound.mp3");
+  let bell = new Audio("bellSound.mp3");
   const leftDoor = Array.from(document.getElementsByClassName("left-door"));
   const rightDoor = Array.from(document.getElementsByClassName("right-door"));
   let calledFloor = elem.getAttribute("data-floor");
-  let animationTimeout;
   let lifts = Array.from(document.getElementsByClassName("lift"));
   let closestLift = 0;
-  let prevTemp = 100000;
+  let busy = false;
 
-  clearTimeout(animationTimeout);
-  // finding closest lift
-  lifts.forEach((lift, i) => {
-    let temp = Math.abs(+lift.getAttribute("data-floor") - calledFloor);
+  busy = availableLifts.every((element) => (element === false ? true : false));
+  console.log(busy);
 
-    // console.log(temp, " ", i);
-    console.log(+lifts[closestLift].getAttribute("data-floor"));
-    if (temp < prevTemp) {
+  if (busy) {
+    console.log("you're in busy");
+    waitingQueue.push(calledFloor);
+    alert("Lifts are busy please wait!");
+  }
+
+  lifts.every((lift, i) => {
+    console.log(i);
+    if (availableLifts[i]) {
       closestLift = i;
-      // console.log(closestLift);
+      return false;
     }
-    prevTemp = temp;
+    return true;
   });
 
   // moving lift to the called floor
-  lifts[closestLift].style.transform = `translateY(-${
-    calledFloor * 15 + 0.2 * calledFloor
-  }rem)`;
+  if (availableLifts[closestLift]) {
+    availableLifts[closestLift] = false;
 
-  let liftFloor = +lifts[closestLift].getAttribute("data-floor");
+    lifts[closestLift].style.transform = `translateY(-${
+      calledFloor * 15 + 0.2 * calledFloor
+    }rem)`;
 
-  lifts[closestLift].style.transition = `all ${
-    Math.abs(liftFloor - calledFloor) * 2.5
-  }s linear`;
-  lifts[closestLift].setAttribute("data-floor", calledFloor);
+    let liftFloor = +lifts[closestLift].getAttribute("data-floor");
 
-  // open and close doors animations
-  // -----removing previous animations
-  leftDoor[closestLift].style.animation = "none";
-  rightDoor[closestLift].style.animation = "none";
-  // ------adding new animations
-  animationTimeout = setTimeout(() => {
-    door.play();
-    bell.play();
-    leftDoor[closestLift].style.animation =
-      "open 2s linear 1, close 2s linear 2s";
-    rightDoor[closestLift].style.animation =
-      "open 2s linear 1, close 2s linear 2s";
-  }, +Math.abs(liftFloor - calledFloor) * 2.5 * 1000 + 2);
+    lifts[closestLift].style.transition = `all ${
+      Math.abs(liftFloor - calledFloor) * 2.5
+    }s linear`;
+    lifts[closestLift].setAttribute("data-floor", calledFloor);
+
+    // open and close doors animations
+    // -----removing previous animations
+    leftDoor[closestLift].style.animation = "none";
+    rightDoor[closestLift].style.animation = "none";
+    // ------adding new animations
+    function anim(callback) {
+      leftDoor[closestLift].style.animation =
+        "open 2s linear 1, close 2s linear 2s";
+      rightDoor[closestLift].style.animation =
+        "open 2s linear 1, close 2s linear 2s";
+      callback();
+    }
+    animationTimeout = setTimeout(() => {
+      door.play();
+      bell.play();
+      anim(afterDoorAnim);
+    }, +Math.abs(liftFloor - calledFloor) * 2.5 * 1000 + 2);
+    function afterDoorAnim() {
+      setTimeout(() => {
+        availableLifts[closestLift] = true;
+      }, 1000 * 4);
+    }
+  }
 }
